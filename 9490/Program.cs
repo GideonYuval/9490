@@ -15,7 +15,7 @@ namespace _9490
             Console.WriteLine(q1);
 
             Console.WriteLine(IsPerfect(q1,5)); //F
-            Console.WriteLine(CountPerfects(q1));
+            Console.WriteLine(CountPerfects(q1)); //2
 
 
 
@@ -50,30 +50,34 @@ namespace _9490
         //Q1
         static bool IsPerfect(Queue<int> q, int m)
         {
-            if (m <= 1 || m > Size(q)) return false;
+            if (m <= 1) return false; // Early return for invalid m
 
             Queue<int> tmp = new Queue<int>();
             int sumBefore = 0;
             bool isPerfect = false;
-            int size = Size(q);
+            int index = 1; // Track the current position in the queue
 
-            // Store elements in temporary queue and calculate the sum before the m-th element
-            for (int i = 1; i <= size; i++)
+            while (!q.IsEmpty())
             {
                 int value = q.Remove();
-                if (i < m)
-                    sumBefore += value;
-                else if (i == m)
-                    isPerfect = (value == sumBefore);
-                tmp.Insert(value);
+
+                if (index < m)
+                    sumBefore += value; // Add to the sum before the m-th element
+                else if (index == m)
+                    isPerfect = (value == sumBefore); // Check if the m-th element matches
+
+                tmp.Insert(value); // Store the element in a temporary queue
+                index++;
             }
 
             // Restore the original queue
             while (!tmp.IsEmpty())
                 q.Insert(tmp.Remove());
 
+            // If m > original size, isPerfect will remain false
             return isPerfect;
         }
+
 
 
         static int CountPerfects(Queue<int> q)
@@ -88,6 +92,59 @@ namespace _9490
         }
 
 
+        //Q2
+        //Return a new Q, in each position the product of all other elements
+        //need to restore q
+
+        static Queue<int> ProductOfOthers(Queue<int> q)
+        {
+            Queue<int> result = new Queue<int>();
+            Queue<int> tmp = new Queue<int>();
+            int totalProduct = 1;            
+
+            // Calc size + Compute the total product of all elements
+            while (!q.IsEmpty())
+            {
+                int value = q.Remove();
+                totalProduct *= value;
+                tmp.Insert(value);
+            }
+
+            // Compute the product of all other elements for each position
+            while (!tmp.IsEmpty())
+            {
+                int value = tmp.Remove();
+                result.Insert(totalProduct / value);
+                q.Insert(value); // Restore the queue
+            }
+
+            return result;
+        }
+
+        static Queue<int> ProductOfOthersBackup(Queue<int> q)
+        {
+            Queue<int> result = new Queue<int>();
+            int totalProduct = 1;
+            int size = Size(q);
+
+            // Compute the total product of all elements
+            for (int i = 0; i < size; i++)
+            {
+                int value = q.Remove();
+                totalProduct *= value;
+                q.Insert(value); // Restore the queue
+            }
+
+            // Compute the product of all other elements for each position
+            for (int i = 0; i < size; i++)
+            {
+                int value = q.Remove();
+                result.Insert(totalProduct / value);
+                q.Insert(value); // Restore the queue
+            }
+
+            return result;
+        }
 
         //Q3
         // Function to calculate maximum sum of any subsequence of length k
@@ -119,34 +176,6 @@ namespace _9490
             }
 
             return maxSum;
-        }
-
-        //Q2
-        //Return a new Q, in each position the product of all other elements
-        //need to restore q
-        static Queue<int> ProductOfOthers(Queue<int> q)
-        {
-            Queue<int> result = new Queue<int>();
-            int totalProduct = 1;
-            int size = Size(q);
-
-            // Compute the total product of all elements
-            for (int i = 0; i < size; i++)
-            {
-                int value = q.Remove();
-                totalProduct *= value;
-                q.Insert(value); // Restore the queue
-            }
-
-            // Compute the product of all other elements for each position
-            for (int i = 0; i < size; i++)
-            {
-                int value = q.Remove();
-                result.Insert(totalProduct / value);
-                q.Insert(value); // Restore the queue
-            }
-
-            return result;
         }
 
 
