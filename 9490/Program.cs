@@ -25,6 +25,8 @@ namespace _9490
             Queue<int> q3 = ProductOfOthers(q2);
             Console.WriteLine(q3);
             Console.WriteLine(q2);
+            Console.WriteLine(RemoveTill10(q2));
+
 
             //Q3
             Queue<int> q = Arr2Q(new int[] { 5, 11, 6, 9, 3, 6, 3 });
@@ -50,7 +52,7 @@ namespace _9490
         //Q1
         static bool IsPerfect(Queue<int> q, int m)
         {
-            if (m <= 1) return false; // Early return for invalid m
+            if (m <= 1) return false; // invalid m
 
             Queue<int> tmp = new Queue<int>();
             int sumBefore = 0;
@@ -64,9 +66,9 @@ namespace _9490
                 if (index < m)
                     sumBefore += value; // Add to the sum before the m-th element
                 else if (index == m)
-                    isPerfect = (value == sumBefore); // Check if the m-th element matches
+                    isPerfect = (value == sumBefore); // Check m-th element
 
-                tmp.Insert(value); // Store the element in a temporary queue
+                tmp.Insert(value); 
                 index++;
             }
 
@@ -74,7 +76,7 @@ namespace _9490
             while (!tmp.IsEmpty())
                 q.Insert(tmp.Remove());
 
-            // If m > original size, isPerfect will remain false
+            // If m > q size, isPerfect = false
             return isPerfect;
         }
 
@@ -82,6 +84,7 @@ namespace _9490
 
         static int CountPerfects(Queue<int> q)
         {
+
             int count = 0;
             int size = Size(q);
 
@@ -90,94 +93,6 @@ namespace _9490
 
             return count;
         }
-
-
-        //Q2
-        //Return a new Q, in each position the product of all other elements
-        //need to restore q
-
-        static Queue<int> ProductOfOthers(Queue<int> q)
-        {
-            Queue<int> result = new Queue<int>();
-            Queue<int> tmp = new Queue<int>();
-            int totalProduct = 1;            
-
-            // Calc size + Compute the total product of all elements
-            while (!q.IsEmpty())
-            {
-                int value = q.Remove();
-                totalProduct *= value;
-                tmp.Insert(value);
-            }
-
-            // Compute the product of all other elements for each position
-            while (!tmp.IsEmpty())
-            {
-                int value = tmp.Remove();
-                result.Insert(totalProduct / value);
-                q.Insert(value); // Restore the queue
-            }
-
-            return result;
-        }
-
-        static Queue<int> ProductOfOthersBackup(Queue<int> q)
-        {
-            Queue<int> result = new Queue<int>();
-            int totalProduct = 1;
-            int size = Size(q);
-
-            // Compute the total product of all elements
-            for (int i = 0; i < size; i++)
-            {
-                int value = q.Remove();
-                totalProduct *= value;
-                q.Insert(value); // Restore the queue
-            }
-
-            // Compute the product of all other elements for each position
-            for (int i = 0; i < size; i++)
-            {
-                int value = q.Remove();
-                result.Insert(totalProduct / value);
-                q.Insert(value); // Restore the queue
-            }
-
-            return result;
-        }
-
-        //Q3
-        // Function to calculate maximum sum of any subsequence of length k
-        // no need to restore q
-        static int MaxSumSubsequence(Queue<int> q, int k)
-        {
-            Queue<int> tmp = new Queue<int>();
-            int maxSum = int.MinValue;
-            int currentSum = 0;
-            int size = Size(q);
-
-            // Calculate the maximum sum of a subsequence of length k
-            for (int i = 0; i < size; i++)
-            {
-                int value = q.Remove();
-                tmp.Insert(value);
-
-                if (i < k)
-                    currentSum += value;
-                else
-                {
-                    currentSum += value - tmp.Remove();
-                }
-
-                if (i >= k - 1)
-                    maxSum = Math.Max(maxSum, currentSum);
-
-                q.Insert(value);
-            }
-
-            return maxSum;
-        }
-
 
         // calculate size of a queue
         static int Size(Queue<int> q)
@@ -193,5 +108,81 @@ namespace _9490
                 q.Insert(tmp.Remove());
             return count;
         }
+
+
+
+
+        //Q2
+        //Return a new Q, in each position the product of all other elements
+        //need to restore q
+
+        static Queue<int> ProductOfOthers(Queue<int> q)
+        {
+            Queue<int> result = new Queue<int>();
+            Queue<int> tmp = new Queue<int>();
+            int totalProduct = 1;            
+
+            // Compute the total product of all elements
+            while (!q.IsEmpty())
+            {
+                int value = q.Remove();
+                totalProduct *= value;
+                tmp.Insert(value); //q->tmp
+            }
+
+            // Compute the product of all other elements for each position
+            while (!tmp.IsEmpty())
+            {
+                int value = tmp.Remove();
+                result.Insert(totalProduct / value);
+                q.Insert(value); // tmp->q
+            }
+
+            return result;
+        }
+        static int RemoveTill10(Queue<int> q)
+        {
+            int count = 0;
+
+            while (!q.IsEmpty())
+            {
+                if (ProductOfOthers(q).Head()<10)
+                    return count;
+                count++;
+            }
+
+            return -1;
+        }
+
+
+
+        //Q3
+        // Function to calculate maximum sum of any subsequence of length k
+        // no need to restore q
+        static int MaxSumSubsequence(Queue<int> q, int k)
+        {
+            Queue<int> tmp = new Queue<int>(); //sliding window holds k elements
+            int maxSum = int.MinValue;
+            int currentSum = 0;
+            int count = 0; //counts elements processed. once count=k, tmp is full
+
+            while (!q.IsEmpty())
+            {
+                int value = q.Remove();
+                tmp.Insert(value);
+                currentSum += value;
+                count++;
+
+                if (count > k) //if tmp holds k+1 elements
+                    currentSum -= tmp.Remove(); //remove the head from tmp and update sum
+
+                if (count >= k) //update max as needed
+                    maxSum = Math.Max(maxSum, currentSum); 
+            }
+
+            return maxSum;
+        }
+
+
     }
 }
